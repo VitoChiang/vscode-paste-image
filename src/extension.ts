@@ -76,6 +76,7 @@ class Paster {
     static insertPatternConfig: string;
     static showFilePathConfirmInputBox: boolean;
     static filePathConfirmInputBoxMode: string;
+    static saveFileAsHugoContentStructureToStaticFolder: boolean;
 
     public static paste() {
         // get current edit file path
@@ -135,6 +136,7 @@ class Paster {
         this.insertPatternConfig = vscode.workspace.getConfiguration('pasteImage')['insertPattern'];
         this.showFilePathConfirmInputBox = vscode.workspace.getConfiguration('pasteImage')['showFilePathConfirmInputBox'] || false;
         this.filePathConfirmInputBoxMode = vscode.workspace.getConfiguration('pasteImage')['filePathConfirmInputBoxMode'];
+        this.saveFileAsHugoContentStructureToStaticFolder = vscode.workspace.getConfiguration('pasteImage')['saveFileAsHugoContentStructureToStaticFolder'] || false;
 
         // replace variable in config
         this.defaultNameConfig = this.replacePathVariable(this.defaultNameConfig, projectPath, filePath, (x) => `[${x}]`);
@@ -143,6 +145,15 @@ class Paster {
         this.namePrefixConfig = this.replacePathVariable(this.namePrefixConfig, projectPath, filePath);
         this.nameSuffixConfig = this.replacePathVariable(this.nameSuffixConfig, projectPath, filePath);
         this.insertPatternConfig = this.replacePathVariable(this.insertPatternConfig, projectPath, filePath);
+        if(this.saveFileAsHugoContentStructureToStaticFolder) {
+            let folderPath = path.dirname(filePath);
+            let contentPathSubFolder = folderPath.split('content')[1];
+
+            let ext = path.extname(filePath);
+            let fileName = path.basename(filePath);
+            let fileNameWithoutExt = path.basename(filePath, ext);
+            this.folderPathConfig = path.join(projectPath, "static", "images", contentPathSubFolder, fileNameWithoutExt);
+        }
 
         // "this" is lost when coming back from the callback, thus we need to store it here.
         const instance = this;
@@ -242,12 +253,12 @@ class Paster {
             let folderPath = path.dirname(filePath);
             let imagePath = "";
 
-            // generate image path
-            if (path.isAbsolute(folderPathFromConfig)) {
-                imagePath = path.join(folderPathFromConfig, fileName);
-            } else {
-                imagePath = path.join(folderPath, folderPathFromConfig, fileName);
-            }
+                // generate image path
+                if (path.isAbsolute(folderPathFromConfig)) {
+                    imagePath = path.join(folderPathFromConfig, fileName);
+                } else {
+                    imagePath = path.join(folderPath, folderPathFromConfig, fileName);
+                }
 
             return imagePath;
         }
@@ -309,11 +320,12 @@ class Paster {
                 '-file', scriptPath,
                 imagePath
             ]);
+            
             powershell.on('error', function (e) {
-                if (e.code == "ENOENT") {
+                if (e.stack == "ENOENT") {
                     Logger.showErrorMessage(`The powershell command is not in you PATH environment variables. Please add it and retry.`);
                 } else {
-                    Logger.showErrorMessage(e);
+                    Logger.showErrorMessage(e.message);
                 }
             });
             powershell.on('exit', function (code, signal) {
@@ -329,7 +341,7 @@ class Paster {
 
             let ascript = spawn('osascript', [scriptPath, imagePath]);
             ascript.on('error', function (e) {
-                Logger.showErrorMessage(e);
+                Logger.showErrorMessage(e.message);
             });
             ascript.on('exit', function (code, signal) {
                 // console.log('exit',code,signal);
@@ -344,7 +356,7 @@ class Paster {
 
             let ascript = spawn('sh', [scriptPath, imagePath]);
             ascript.on('error', function (e) {
-                Logger.showErrorMessage(e);
+                Logger.showErrorMessage(e.message);
             });
             ascript.on('exit', function (code, signal) {
                 // console.log('exit',code,signal);

@@ -1,20 +1,20 @@
 {
-  "name": "vscode-paste-image",
+  "name": "fm-tech-vscode-paste-image",
   "displayName": "Paste Image",
   "description": "paste image from clipboard directly",
-  "version": "1.0.4",
-  "publisher": "mushan",
+  "version": "1.0.5",
+  "publisher": "Vito Chiang",
   "author": {
-    "name": "mushan",
-    "email": "mushanmail@126.com"
+    "name": "Vito Chiang",
+    "email": "vitochiang@outlook.com"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/mushanshitiancai/vscode-paste-image.git"
+    "url": "https://github.com/VitoChiang/vscode-paste-image"
   },
-  "homepage": "https://github.com/mushanshitiancai/vscode-paste-image/blob/master/README.md",
+  "homepage": "https://github.com/VitoChiang/vscode-paste-image/blob/master/README.md",
   "bugs": {
-    "url": "https://github.com/mushanshitiancai/vscode-paste-image/issues"
+    "url": "https://github.com/VitoChiang/vscode-paste-image/issues"
   },
   "icon": "res/icon.png",
   "galleryBanner": {
@@ -26,10 +26,11 @@
     "image",
     "markdown",
     "paste image",
-    "keybindings"
+    "keybindings",
+    "hugo"
   ],
   "engines": {
-    "vscode": "^1.0.0"
+    "vscode": "^1.73.0"
   },
   "categories": [
     "Other"
@@ -111,6 +112,11 @@
           ],
           "default": "fullPath",
           "description": "Set the mode of file path confirm inputbox"
+        },
+        "pasteImage.saveFileAsHugoContentStructureToStaticFolder": {
+          "type": "boolean",
+          "default": false,
+          "description": "Set to true if you want to save the file to the static folder of Hugo content structure. This is useful when you want to use the image in Hugo content. And will ignore Path settings."
         }
       }
     },
@@ -130,9 +136,10 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "node ./node_modules/vscode/bin/compile",
-    "compile": "node ./node_modules/vscode/bin/compile -watch -p ./",
-    "postinstall": "node ./node_modules/vscode/bin/install"
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "lint": "eslint \"src/**/*.ts\"",
+    "watch": "tsc -watch -p ./"
   },
   "dependencies": {
     "copy-paste": "^1.2.0",
@@ -141,7 +148,8 @@
     "upath": "^1.0.0"
   },
   "devDependencies": {
-    "typescript": "^1.8.5",
-    "vscode": "^0.11.0"
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^16.18.34",
+    "@types/vscode": "^1.73.0"
   }
 }
